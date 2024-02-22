@@ -4,7 +4,7 @@
   "description": "Tracks the after hours total of your Yahoo Finance portfolio.",
   "version": "1.0",
   "action": {
-    "default_title": "Tracks the after hours total of your Yahoo Finance portfolio.",
+    "default_title": "Shu's After Hours Portfolio Tracker",
     "default_popup": "popup.html"
   },
   "permissions": ["activeTab", "scripting"]
