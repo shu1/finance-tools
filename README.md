@@ -13,4 +13,5 @@ A custom portfolio view with **Post-Mkt Chg %** (or **Pre-Mkt Chg %**) and **Mar
 
 The popup will show the amount your portfolio changed after hours.  
 The extension button badge will show what percent of your portfolio the change is.  
+By default, it will try to get the Post-Market change. You can also click the Pre-Market button, if you have the **Pre-Mkt Chg %** column in your view.  Depending on the time of day, if data in one column isn't available then it'll automatically try the other.  
 The browser console will show a table of all stocks in the portfolio, and the amount each stock changed after hours. Click on a column head to sort by that column.
