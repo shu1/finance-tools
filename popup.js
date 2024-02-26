@@ -43,7 +43,8 @@ function contentScript(i) {
       const marketValue = Number(stock.getAttribute("value"));
       portfolioSum += marketValue;
 
-      const changePercent = Number(stockTable.querySelector(`[data-field=${i ? "post" : "pre"}MarketChangePercent][data-symbol=${stock.dataset.symbol}]`)?.getAttribute("value"));
+      let changePercent = stockTable.querySelector(`[data-field=${i ? "post" : "pre"}MarketChangePercent][data-symbol=${stock.dataset.symbol}]`);
+      changePercent = Number(changePercent?.getAttribute("value"));
       const changeValue = marketValue * changePercent / 100;
       changeSum += changePercent ? changeValue : 0;
 
