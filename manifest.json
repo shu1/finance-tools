@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Shu's After Hours Portfolio Tracker",
-  "description": "Tracks the after hours total of your Yahoo Finance portfolio.",
+  "name": "Shu's Finance Tools",
+  "description": "Extra utilities for your Yahoo Finance portfolios.",
   "version": "1.0",
   "action": {
-    "default_title": "Shu's After Hours Portfolio Tracker",
+    "default_title": "Shu's Finance Tools",
     "default_popup": "popup.html"
   },
   "permissions": ["activeTab", "scripting"]

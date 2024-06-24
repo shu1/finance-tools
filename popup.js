@@ -1,21 +1,21 @@
 // Shuichi Aizawa 2024
-afterHours();
-pre_button.onclick = () => afterHours(0);
-post_button.onclick = () => afterHours(1);
+"use strict";
 
-function afterHours(preOrPost = 1) {
+pre_button.onclick = () => shusFinanceTools(0);
+post_button.onclick = () => shusFinanceTools(1);
+range_button.onclick = () => shusFinanceTools(2);
+
+function shusFinanceTools(mode) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
     if (tab.url.startsWith("https://finance.yahoo.com/portfolio/")) {
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: contentScript,
-        args: [preOrPost],
+        args: [mode],
       }).then(([res]) => {
         if (res.result) {
           pre_post.innerHTML = res.result[0];
           change_sum.innerHTML = "$" + res.result[1];
-          warning_div.style.display = "none";
-          result_div.style.display = "block";
           chrome.action.setBadgeText({ text: res.result[2].toFixed(1) + "%" });
           chrome.action.setTitle({ title: res.result[0] + "-Mkt Chg Sum: $" + res.result[1] });
         }
@@ -24,43 +24,63 @@ function afterHours(preOrPost = 1) {
   });
 }
 
-function contentScript(i) {
+function contentScript(mode) {
   const stockTable = document.querySelector("#pf-detail-table");
-  const stockList = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
-
-  function format(n) {
-    return n ? Number(n.toFixed(2)) : 0;
-  }
-
-  const p = ["Pre", "Post"];
-  let portfolioSum, changeSum, changeTable;
-  function scrapeTable(preOrPost) {
-    i = preOrPost;
-    portfolioSum = 0;
-    changeSum = 0;
-    changeTable = {};
-    stockList.forEach((stock) => {
-      const marketValue = Number(stock.getAttribute("value"));
-      portfolioSum += marketValue;
-
-      let changePercent = stockTable.querySelector(`[data-field=${i ? "post" : "pre"}MarketChangePercent][data-symbol=${stock.dataset.symbol}]`);
-      changePercent = Number(changePercent?.getAttribute("value"));
-      const changeValue = marketValue * changePercent / 100;
-      changeSum += changePercent ? changeValue : 0;
-
-      changeTable[stock.dataset.symbol] = {
-        "Market Value": format(marketValue),
-        [p[i] + "-Mkt Chg %"]: format(changePercent),
-        [p[i] + "-Mkt Chg Val"]: format(changeValue),
+  if (mode == 2) {
+    const prices = stockTable.querySelectorAll("[data-field=regularMarketPrice][data-trend=none]");
+    const highs = stockTable.querySelectorAll("[aria-label='52-Wk High']");
+    const lows = stockTable.querySelectorAll("[aria-label='52-Wk Low']");
+  
+    let rangeTable = {};
+    for (let i = 0; i < prices.length; ++i) {
+      const price = Number(prices[i].getAttribute("value"));
+      const high = Number(highs[i].innerText.replace(/,/g,''));
+      const low = Number(lows[i].innerText.replace(/,/g,''));
+      rangeTable[prices[i].dataset.symbol] = {
+        "52-Wk percentage": (price - low) / (high - low),
       };
-    });
+    }
+    console.table(rangeTable);
   }
-  scrapeTable(i);
-  if (!changeSum) scrapeTable(1 - i);
-  if (!changeSum) return;
+  else if (mode <= 1) {
+    const stockList = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
 
-  console.table(changeTable);
-  const sumPercent = format(changeSum / portfolioSum * 100);
-  console.log(`${p[i]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
-  return [p[i], format(changeSum), sumPercent];
+    function format(n) {
+      return n ? Number(n.toFixed(2)) : 0;
+    }
+
+    const p = ["Pre", "Post"];
+    let portfolioSum, changeSum, changeTable;
+    function scrapeTable() {
+      portfolioSum = 0;
+      changeSum = 0;
+      changeTable = {};
+      stockList.forEach((stock) => {
+        const marketValue = Number(stock.getAttribute("value"));
+        portfolioSum += marketValue;
+
+        let changePercent = stockTable.querySelector(`[data-field=${mode ? "post" : "pre"}MarketChangePercent][data-symbol=${stock.dataset.symbol}]`);
+        changePercent = Number(changePercent?.getAttribute("value"));
+        const changeValue = marketValue * changePercent / 100;
+        changeSum += changePercent ? changeValue : 0;
+
+        changeTable[stock.dataset.symbol] = {
+          "Market Value": format(marketValue),
+          [p[mode] + "-Mkt Chg %"]: format(changePercent),
+          [p[mode] + "-Mkt Chg Val"]: format(changeValue),
+        };
+      });
+    }
+    scrapeTable();
+    if (!changeSum) {
+      mode = 1 - mode;
+      scrapeTable();
+    }
+    if (!changeSum) return;
+
+    console.table(changeTable);
+    const sumPercent = format(changeSum / portfolioSum * 100);
+    console.log(`${p[mode]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
+    return [p[mode], format(changeSum), sumPercent];
+  }
 }
