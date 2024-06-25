@@ -6,14 +6,14 @@ This extension only works on Yahoo Finance portfolio pages.
 - A [custom portfolio view](https://help.yahoo.com/kb/set-custom-views-portfolios-sln5231.html) with **Post-Mkt Chg %** (or **Pre-Mkt Chg %**) and **Market Value** columns required.
 - The portfolio must have holdings data of bought stocks.
 - Open the browser console, then click the button.  
-The popup will show the amount your portfolio changed after hours.  
-The extension button badge will show what percent of your portfolio the change is.  
-The browser console will show a table of all stocks in the portfolio, and the amount each stock changed after hours. Click on a column head to sort by that column.
+  The popup will show the amount your portfolio changed after hours.  
+  The extension button badge will show what percent of your portfolio the change is.  
+  The browser console will show a table of all stocks in the portfolio, and the amount each stock changed after hours. Click on a column head to sort by that column.
 
 ### 52-Week Range Sorter
 - A [custom portfolio view](https://help.yahoo.com/kb/set-custom-views-portfolios-sln5231.html) with **52-Wk Low**, **52-Wk High**, and **Last Price** columns required.
 - Open the browser console, then click the button.  
-The console will show a table of all stocks in the portfolio, and the 52-week percentage. Click on the column head to sort by the 52-week range.
+  The console will show a table of all stocks in the portfolio, and the 52-week percentage. Click on the column head to sort by the 52-week range.
 
 ## Installation
 - Download the source into a folder.

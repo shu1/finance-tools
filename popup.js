@@ -9,17 +9,17 @@ function shusFinanceTools(mode) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
     if (tab.url.startsWith("https://finance.yahoo.com/portfolio/")) {
       chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: contentScript,
-        args: [mode],
-      }).then(([res]) => {
-        if (res.result) {
-          pre_post.innerHTML = res.result[0];
-          change_sum.innerHTML = "$" + res.result[1];
-          chrome.action.setBadgeText({ text: res.result[2].toFixed(1) + "%" });
-          chrome.action.setTitle({ title: res.result[0] + "-Mkt Chg Sum: $" + res.result[1] });
-        }
-      });
+          target: { tabId: tab.id },
+          func: contentScript,
+          args: [mode],
+        }).then(([res]) => {
+          if (res.result) {
+            pre_post.innerHTML = res.result[0];
+            change_sum.innerHTML = "$" + res.result[1];
+            chrome.action.setBadgeText({text: res.result[2].toFixed(1) + "%"});
+            chrome.action.setTitle({title: res.result[0] + "-Mkt Chg Sum: $" + res.result[1]});
+          }
+        });
     }
   });
 }
@@ -30,14 +30,14 @@ function contentScript(mode) {
     const prices = stockTable.querySelectorAll("[data-field=regularMarketPrice][data-trend=none]");
     const highs = stockTable.querySelectorAll("[aria-label='52-Wk High']");
     const lows = stockTable.querySelectorAll("[aria-label='52-Wk Low']");
-  
+
     let rangeTable = {};
     for (let i = 0; i < prices.length; ++i) {
       const price = Number(prices[i].getAttribute("value"));
-      const high = Number(highs[i].innerText.replace(/,/g,''));
-      const low = Number(lows[i].innerText.replace(/,/g,''));
+      const high = Number(highs[i].innerText.replace(/,/g, ""));
+      const low = Number(lows[i].innerText.replace(/,/g, ""));
       rangeTable[prices[i].dataset.symbol] = {
-        "52-Wk percentage": (price - low) / (high - low),
+        "52-Wk percentage": (price - low) / (high - low)
       };
     }
     console.table(rangeTable);
