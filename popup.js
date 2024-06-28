@@ -25,29 +25,40 @@ function shusFinanceTools(mode) {
 }
 
 function contentScript(mode) {
+  function format(n) {
+    return n ? Number(n.toFixed(2)) : 0;
+  }
+
   const stockTable = document.querySelector("#pf-detail-table");
   if (mode == 2) {
     const prices = stockTable.querySelectorAll("[data-field=regularMarketPrice][data-trend=none]");
     const highs = stockTable.querySelectorAll("[aria-label='52-Wk High']");
     const lows = stockTable.querySelectorAll("[aria-label='52-Wk Low']");
 
-    let rangeTable = {};
+    const rangeArray = [];
     for (let i = 0; i < prices.length; ++i) {
       const price = Number(prices[i].getAttribute("value"));
       const high = Number(highs[i].innerText.replace(/,/g, ""));
       const low = Number(lows[i].innerText.replace(/,/g, ""));
-      rangeTable[prices[i].dataset.symbol] = {
-        "52-Wk percentage": (price - low) / (high - low)
+      rangeArray.push({
+        index: i,
+        symbol: prices[i].dataset.symbol,
+        percentage: (price - low) / (high - low),
+      });
+    }
+    rangeArray.sort((a, b) => a.percentage - b.percentage);
+
+    const rangeTable = {};
+    for (let i = 0; i < rangeArray.length; ++i) {
+      rangeTable[rangeArray[i].symbol] = {
+        change: i - rangeArray[i].index,
+        "52-Wk percentage": format(rangeArray[i].percentage * 100),
       };
     }
     console.table(rangeTable);
   }
   else if (mode <= 1) {
     const stockList = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
-
-    function format(n) {
-      return n ? Number(n.toFixed(2)) : 0;
-    }
 
     const p = ["Pre", "Post"];
     let portfolioSum, changeSum, changeTable;
