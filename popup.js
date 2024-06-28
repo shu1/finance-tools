@@ -31,7 +31,7 @@ function contentScript(mode) {
 
   const stockTable = document.querySelector("#pf-detail-table");
   if (mode <= 1) {
-    const stockList = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
+    const stocks = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
 
     const p = ["Pre", "Post"];
     let portfolioSum, changeSum, changeTable;
@@ -39,7 +39,7 @@ function contentScript(mode) {
       portfolioSum = 0;
       changeSum = 0;
       changeTable = {};
-      stockList.forEach((stock) => {
+      stocks.forEach((stock) => {
         const marketValue = Number(stock.getAttribute("value"));
         portfolioSum += marketValue;
 
@@ -83,8 +83,26 @@ function contentScript(mode) {
         percentage: (price - low) / (high - low),
       });
     }
-    rangeArray.sort((a, b) => a.percentage - b.percentage);
 
+    const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
+    function sortTable(i) {
+      if (i >= rangeArray.length) return;
+
+      let smallest = i;
+      for (let j = i + 1; j < rangeArray.length; ++j) {
+        if (rangeArray[j].percentage < rangeArray[smallest].percentage) smallest = j;
+      }
+
+      if (smallest == i) sortTable(i + 1);
+      else {
+        rows[smallest].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        rows[smallest].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: 32 * (i - smallest) }));
+        rows[smallest].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      }
+    }
+    sortTable(0);
+
+    rangeArray.sort((a, b) => a.percentage - b.percentage);
     const rangeTable = {};
     for (let i = 0; i < rangeArray.length; ++i) {
       rangeTable[rangeArray[i].symbol] = {
