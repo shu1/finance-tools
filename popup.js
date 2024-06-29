@@ -68,7 +68,7 @@ function contentScript(mode) {
     return [p[mode], format(changeSum), sumPercent];
   }
   else if (mode == 2) {
-    const prices = stockTable.querySelectorAll("[data-field=regularMarketPrice][data-trend=none]");
+    const prices = stockTable.querySelectorAll(":not(.Fz\\(s\\))[data-field=regularMarketPrice][data-trend=none]");
     const highs = stockTable.querySelectorAll("[aria-label='52-Wk High']");
     const lows = stockTable.querySelectorAll("[aria-label='52-Wk Low']");
 
