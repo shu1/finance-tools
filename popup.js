@@ -12,12 +12,18 @@ function shusFinanceTools(mode) {
           target: { tabId: tab.id },
           func: contentScript,
           args: [mode],
-        }).then(([res]) => {
+        })
+        .then(([res]) => {
           if (res.result) {
-            pre_post.innerHTML = res.result[0];
-            change_sum.innerHTML = "$" + res.result[1];
-            chrome.action.setBadgeText({ text: res.result[2].toFixed(1) + "%" });
-            chrome.action.setTitle({ title: res.result[0] + "-Mkt Chg Sum: $" + res.result[1] });
+            if (res.result[0] <= 1) {
+              pre_post.innerHTML = res.result[1];
+              change_sum.innerHTML = "$" + res.result[2];
+              chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
+              chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
+            }
+            else if (res.result[0] == 2) {
+              changed_stocks.innerHTML += res.result[1] + ": " + res.result[2] + "<br>";
+            }
           }
         });
     }
@@ -65,7 +71,7 @@ function contentScript(mode) {
     console.table(changeTable);
     const sumPercent = format(changeSum / portfolioSum * 100);
     console.log(`${p[mode]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
-    return [p[mode], format(changeSum), sumPercent];
+    return [mode, p[mode], format(changeSum), sumPercent];
   }
   else if (mode == 2) {
     const prices = stockTable.querySelectorAll(":not(.Fz\\(s\\))[data-field=regularMarketPrice][data-trend=none]");
@@ -84,32 +90,45 @@ function contentScript(mode) {
       });
     }
 
-    const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
-    function sortTable(i) {
-      if (i >= rangeArray.length) return;
+    let changed;
+    const reorder = document.querySelector("[data-test=save-order-btn]");
+    if (reorder) {
+      const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
+      function sortTable(i) {
+        if (i >= rangeArray.length) return;
 
-      let smallest = i;
-      for (let j = i + 1; j < rangeArray.length; ++j) {
-        if (rangeArray[j].percentage < rangeArray[smallest].percentage) smallest = j;
-      }
+        let min = i;
+        for (let j = i + 1; j < rangeArray.length; ++j) {
+          if (rangeArray[j].percentage < rangeArray[min].percentage) min = j;
+        }
 
-      if (smallest == i) sortTable(i + 1);
-      else {
-        rows[smallest].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-        rows[smallest].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: 32 * (i - smallest) }));
-        rows[smallest].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+        if (min == i) sortTable(i + 1);
+        else {
+          changed = {};
+          changed.symbol = rangeArray[min].symbol;
+          changed.place = i - min;
+
+          rows[min].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+          rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: 32 * changed.place }));
+          rows[min].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+        }
       }
+      sortTable(0);
     }
-    sortTable(0);
 
     rangeArray.sort((a, b) => a.percentage - b.percentage);
     const rangeTable = {};
     for (let i = 0; i < rangeArray.length; ++i) {
       rangeTable[rangeArray[i].symbol] = {
         change: i - rangeArray[i].index,
-        "52-Wk percentage": format(rangeArray[i].percentage * 100),
+        "52-Wk %": format(rangeArray[i].percentage * 100),
       };
     }
     console.table(rangeTable);
+
+    if (changed) {
+      console.log(changed.symbol, changed.place);
+      return [mode, changed.symbol, changed.place];
+    }
   }
 }
