@@ -9,23 +9,23 @@ function shusFinanceTools(mode) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
     if (tab.url.startsWith("https://finance.yahoo.com/portfolio/")) {
       chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: contentScript,
-          args: [mode],
-        })
-        .then(([res]) => {
-          if (res.result) {
-            if (res.result[0] <= 1) {
-              pre_post.innerHTML = res.result[1];
-              change_sum.innerHTML = "$" + res.result[2];
-              chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
-              chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
-            }
-            else if (res.result[0] == 2) {
-              changed_stocks.innerHTML += res.result[1] + ": " + res.result[2] + "<br>";
-            }
+        target: { tabId: tab.id },
+        func: contentScript,
+        args: [mode],
+      })
+      .then(([res]) => {
+        if (res.result) {
+          if (res.result[0] <= 1) {
+            pre_post.innerHTML = res.result[1];
+            change_sum.innerHTML = "$" + res.result[2];
+            chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
+            chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
           }
-        });
+          else if (res.result[0] == 2) {
+            changed_stocks.innerHTML += res.result[1] + ": " + res.result[2] + "<br>";
+          }
+        }
+      });
     }
   });
 }
