@@ -1,11 +1,11 @@
 // Shuichi Aizawa 2024
 "use strict";
 
-pre_button.onclick = () => shusFinanceTools(0);
-post_button.onclick = () => shusFinanceTools(1);
-range_button.onclick = () => shusFinanceTools(2);
+pre_button.onclick = () => shuFinanceTools(0);
+post_button.onclick = () => shuFinanceTools(1);
+range_button.onclick = () => shuFinanceTools(2);
 
-function shusFinanceTools(mode) {
+function shuFinanceTools(mode) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
     if (tab.url.startsWith("https://finance.yahoo.com/portfolio/")) {
       chrome.scripting.executeScript({
@@ -93,25 +93,23 @@ function contentScript(mode) {
     let changed;
     const reorder = document.querySelector("[data-test=save-order-btn]");
     if (reorder) {
-      const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
       function sortTable(i) {
-        if (i >= rangeArray.length) return;
-
         let min = i;
         for (let j = i + 1; j < rangeArray.length; ++j) {
           if (rangeArray[j].percentage < rangeArray[min].percentage) min = j;
         }
 
-        if (min == i) sortTable(i + 1);
-        else {
+        if (min > i) {
           changed = {};
           changed.symbol = rangeArray[min].symbol;
           changed.place = i - min;
 
+          const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
           rows[min].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
           rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: 32 * changed.place }));
           rows[min].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
         }
+        else if (i + 2 < rangeArray.length) sortTable(i + 1);
       }
       sortTable(0);
     }
