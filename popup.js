@@ -100,13 +100,11 @@ function contentScript(mode) {
         }
 
         if (min > i) {
-          changed = {};
-          changed.symbol = rangeArray[min].symbol;
-          changed.place = i - min;
+          changed = { symbol: rangeArray[min].symbol, place: i - min };
 
           const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
           rows[min].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-          rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: 32 * changed.place }));
+          rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: (i - min) * 32 }));
           rows[min].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
         }
         else if (i + 2 < rangeArray.length) sortTable(i + 1);
