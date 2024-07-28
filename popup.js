@@ -15,15 +15,10 @@ function shuFinanceTools(mode) {
       })
       .then(([res]) => {
         if (res.result) {
-          if (res.result[0] <= 1) {
-            pre_post.innerHTML = res.result[1];
-            change_sum.innerHTML = "$" + res.result[2];
-            chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
-            chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
-          }
-          else if (res.result[0] == 2) {
-            changed_stocks.innerHTML += res.result[1] + ": " + res.result[2] + "<br>";
-          }
+          pre_post.innerHTML = res.result[0];
+          change_sum.innerHTML = "$" + res.result[1];
+          chrome.action.setBadgeText({ text: res.result[2].toFixed(1) + "%" });
+          chrome.action.setTitle({ title: res.result[0] + "-Mkt Chg Sum: $" + res.result[1] });
         }
       });
     }
@@ -71,7 +66,7 @@ function contentScript(mode) {
     console.table(changeTable);
     const sumPercent = format(changeSum / portfolioSum * 100);
     console.log(`${p[mode]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
-    return [mode, p[mode], format(changeSum), sumPercent];
+    return [p[mode], format(changeSum), sumPercent];
   }
   else if (mode == 2) {
     const prices = stockTable.querySelectorAll(":not(.Fz\\(s\\))[data-field=regularMarketPrice][data-trend=none]");
@@ -90,7 +85,6 @@ function contentScript(mode) {
       });
     }
 
-    let changed;
     const reorder = document.querySelector("[data-test=save-order-btn]");
     if (reorder) {
       function sortTable(i) {
@@ -100,19 +94,20 @@ function contentScript(mode) {
         }
 
         if (min > i) {
-          changed = { symbol: rangeArray[min].symbol, place: i - min };
-
           const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
           rows[min].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
           rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: (i - min) * 32 }));
           rows[min].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+
+          rangeArray.splice(i, 0, rangeArray.splice(min, 1)[0]);
         }
-        else if (i + 2 < rangeArray.length) sortTable(i + 1);
+
+        if (i + 2 < rangeArray.length) sortTable(i + 1);
       }
       sortTable(0);
     }
+    else rangeArray.sort((a, b) => a.percentage - b.percentage);
 
-    rangeArray.sort((a, b) => a.percentage - b.percentage);
     const rangeTable = {};
     for (let i = 0; i < rangeArray.length; ++i) {
       rangeTable[rangeArray[i].symbol] = {
@@ -121,10 +116,5 @@ function contentScript(mode) {
       };
     }
     console.table(rangeTable);
-
-    if (changed) {
-      console.log(changed.symbol, changed.place);
-      return [mode, changed.symbol, changed.place];
-    }
   }
 }

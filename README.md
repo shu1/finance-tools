@@ -9,7 +9,6 @@ This extension only works on Yahoo Finance portfolio pages.
 ### 52-Week Range Sorter
 - A [custom portfolio view](https://help.yahoo.com/kb/set-custom-views-portfolios-sln5231.html) with **52-Wk Low**, **52-Wk High**, and **Last Price** columns required.
 - In your portfolio page, click on Reorder. Then click the button in the extension to sort your portfolio.  
-  Each click sorts one stock, click as many times as necessary to sort the entire portfolio.  
   Don't forget to Save!
 
 ## Installation
