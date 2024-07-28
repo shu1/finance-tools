@@ -31,9 +31,9 @@ function contentScript(mode) {
   }
 
   const stockTable = document.querySelector("#pf-detail-table");
-  const stocks = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
-
   if (mode <= 1) {
+    const stocks = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
+
     const p = ["Pre", "Post"];
     let portfolioSum, changeSum, changeTable;
     function scrapeTable() {
@@ -75,14 +75,18 @@ function contentScript(mode) {
 
     const rangeArray = [];
     for (let i = 0; i < prices.length; ++i) {
+      const symbol = prices[i].dataset.symbol;
+      const stock = stockTable.querySelector(`.Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none][data-symbol=${symbol}]`);
+      const marketValue = Number(stock?.getAttribute("value"));
       const price = Number(prices[i].getAttribute("value"));
       const high = Number(highs[i].innerText.replace(/,/g, ""));
       const low = Number(lows[i].innerText.replace(/,/g, ""));
+
       rangeArray.push({
         index: i,
-        symbol: prices[i].dataset.symbol,
+        symbol: symbol,
         percentage: (price - low) / (high - low),
-        marketValue: Number(stocks[i].getAttribute("value")),
+        marketValue: marketValue,
       });
     }
 
