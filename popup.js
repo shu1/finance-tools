@@ -31,9 +31,9 @@ function contentScript(mode) {
   }
 
   const stockTable = document.querySelector("#pf-detail-table");
-  if (mode <= 1) {
-    const stocks = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
+  const stocks = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
 
+  if (mode <= 1) {
     const p = ["Pre", "Post"];
     let portfolioSum, changeSum, changeTable;
     function scrapeTable() {
@@ -82,6 +82,7 @@ function contentScript(mode) {
         index: i,
         symbol: prices[i].dataset.symbol,
         percentage: (price - low) / (high - low),
+        marketValue: Number(stocks[i].getAttribute("value")),
       });
     }
 
@@ -113,6 +114,7 @@ function contentScript(mode) {
       rangeTable[rangeArray[i].symbol] = {
         change: i - rangeArray[i].index,
         "52-Wk %": format(rangeArray[i].percentage * 100),
+        "Market Value": format(rangeArray[i].marketValue),
       };
     }
     console.table(rangeTable);
