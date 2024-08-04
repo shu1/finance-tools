@@ -44,7 +44,7 @@ function contentScript(mode) {
         const marketValue = Number(stock.getAttribute("value"));
         portfolioSum += marketValue;
 
-        let changePercent = stockTable.querySelector(`[data-field=${mode ? "post" : "pre"}MarketChangePercent][data-symbol=${stock.dataset.symbol}]`);
+        let changePercent = stockTable.querySelector(`[data-field=${mode ? "post" : "pre"}MarketChangePercent][data-symbol="${stock.dataset.symbol}"]`);
         changePercent = Number(changePercent?.getAttribute("value"));
         const changeValue = marketValue * changePercent / 100;
         changeSum += changePercent ? changeValue : 0;
@@ -76,7 +76,7 @@ function contentScript(mode) {
     const rangeArray = [];
     for (let i = 0; i < prices.length; ++i) {
       const symbol = prices[i].dataset.symbol;
-      const stock = stockTable.querySelector(`.Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none][data-symbol=${symbol}]`);
+      const stock = stockTable.querySelector(`.Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none][data-symbol="${symbol}"]`);
       const marketValue = Number(stock?.getAttribute("value"));
       const price = Number(prices[i].getAttribute("value"));
       const high = Number(highs[i].innerText.replace(/,/g, ""));
