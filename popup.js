@@ -46,13 +46,13 @@ function contentScript(mode) {
 
         let changePercent = stockTable.querySelector(`[data-field=${mode ? "post" : "pre"}MarketChangePercent][data-symbol="${stock.dataset.symbol}"]`);
         changePercent = Number(changePercent?.getAttribute("value"));
-        const changeValue = marketValue * changePercent / 100;
-        changeSum += changePercent ? changeValue : 0;
+        const changeValue = changePercent ? marketValue * changePercent / 100 : 0;
+        changeSum += changeValue;
 
         changeTable[stock.dataset.symbol] = {
-          "Market Value": format(marketValue),
           [p[mode] + "-Mkt Chg %"]: format(changePercent),
           [p[mode] + "-Mkt Chg Val"]: format(changeValue),
+          [p[mode] + "-Mkt Val"]: format(marketValue + changeValue),
         };
       });
     }
