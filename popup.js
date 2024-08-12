@@ -15,10 +15,26 @@ function shuFinanceTools(mode) {
       })
       .then(([res]) => {
         if (res.result) {
-          pre_post.innerHTML = res.result[0];
-          change_sum.innerHTML = "$" + res.result[1];
-          chrome.action.setBadgeText({ text: res.result[2].toFixed(1) + "%" });
-          chrome.action.setTitle({ title: res.result[0] + "-Mkt Chg Sum: $" + res.result[1] });
+          if (res.result[0] <= 1) {
+            pre_post.innerHTML = res.result[1];
+            change_sum.innerHTML = "$" + res.result[2];
+            chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
+            chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
+          }
+          else if (res.result[0] == 2) {
+            res.result[1].sort((a, b) => a.change - b.change);
+            let changes = 0;
+            res.result[1].forEach((stock) => {
+              if (stock.change) {
+                if (!changes) stock_changes.innerHTML = "";
+                stock_changes.innerHTML += stock.symbol + ": " + stock.change;
+                if (stock.marketValue) stock_changes.innerHTML += ", $" + Math.round(stock.marketValue);
+                stock_changes.innerHTML += "<br>";
+                ++changes;
+              }
+            });
+            if (!changes) stock_changes.innerHTML = "No changes";
+          }
         }
       });
     }
@@ -66,7 +82,7 @@ function contentScript(mode) {
     console.table(changeTable);
     const sumPercent = format(changeSum / portfolioSum * 100);
     console.log(`${p[mode]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
-    return [p[mode], format(changeSum), sumPercent];
+    return [mode, p[mode], format(changeSum), sumPercent];
   }
   else if (mode == 2) {
     const prices = stockTable.querySelectorAll(":not(.Fz\\(s\\))[data-field=regularMarketPrice][data-trend=none]");
@@ -115,12 +131,15 @@ function contentScript(mode) {
 
     const rangeTable = {};
     for (let i = 0; i < rangeArray.length; ++i) {
+      rangeArray[i].change = i - rangeArray[i].index;
+
       rangeTable[rangeArray[i].symbol] = {
-        change: i - rangeArray[i].index,
+        change: rangeArray[i].change,
         "52-Wk %": format(rangeArray[i].percentage * 100),
         "Market Value": format(rangeArray[i].marketValue),
       };
     }
     console.table(rangeTable);
+    return [mode, rangeArray];
   }
 }
