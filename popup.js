@@ -26,14 +26,12 @@ function shuFinanceTools(mode) {
             let changes = 0;
             res.result[1].forEach((stock) => {
               if (stock.change) {
-                if (!changes) stock_changes.innerHTML = "";
-                stock_changes.innerHTML += stock.symbol + ": " + stock.change;
-                if (stock.marketValue) stock_changes.innerHTML += ", $" + Math.round(stock.marketValue);
-                stock_changes.innerHTML += "<br>";
+                if (!changes) stock_table.innerHTML = "";
+                stock_table.innerHTML += `<tr><td>${stock.symbol}</td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
                 ++changes;
               }
             });
-            if (!changes) stock_changes.innerHTML = "No changes";
+            if (!changes) stock_table.innerHTML = "No changes";
           }
         }
       });
