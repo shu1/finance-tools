@@ -44,29 +44,39 @@ function contentScript(mode) {
     return n ? Number(n.toFixed(2)) : 0;
   }
 
-  const stockTable = document.querySelector("#pf-detail-table");
+  const stockTable = document.querySelector("#nimbus-app .table-container.cs-compact.headerWrap > table");
   if (mode <= 1) {
-    const stocks = stockTable.querySelectorAll(".Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none]");
-
     const p = ["Pre", "Post"];
+
+    const heads = stockTable.querySelectorAll("thead > tr > th");
+    let changePercentCol, marketValueCol;
+    heads.forEach((head, i) => {
+      if (head.innerText == p[mode] + "-Mkt Chg %") changePercentCol = i + 1;
+      else if (head.innerText == "Market Value ($)") marketValueCol = i + 1;
+    });
+    if (!changePercentCol || !marketValueCol) {
+      console.log(`"${p[mode]}-Mkt Chg %" or "Market Value ($)" columns not found.`);
+      return;
+    }
+
+    const stocks = stockTable.querySelectorAll("tbody > tr");
     let portfolioSum, changeSum, changeTable;
     function scrapeTable() {
       portfolioSum = 0;
       changeSum = 0;
       changeTable = {};
       stocks.forEach((stock) => {
-        const marketValue = Number(stock.getAttribute("value"));
+        const marketValue = Number(stock.querySelector(`td:nth-child(${marketValueCol}) > span`).textContent.replace(/,/g, ""));
         portfolioSum += marketValue;
 
-        let changePercent = stockTable.querySelector(`[data-field=${mode ? "post" : "pre"}MarketChangePercent][data-symbol="${stock.dataset.symbol}"]`);
-        changePercent = Number(changePercent?.getAttribute("value"));
+        const changePercent = Number(stock.querySelector(`td:nth-child(${changePercentCol}) > span`)?.textContent.replace(/%/g, ""));
         const changeValue = changePercent ? marketValue * changePercent / 100 : 0;
         changeSum += changeValue;
 
-        changeTable[stock.dataset.symbol] = {
+        changeTable[stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent] = {
           [p[mode] + "-Mkt Chg %"]: format(changePercent),
-          [p[mode] + "-Mkt Chg Val"]: format(changeValue),
-          [p[mode] + "-Mkt Val"]: format(marketValue + changeValue),
+          [p[mode] + "-Mkt Chg $"]: format(changeValue),
+          [p[mode] + "-Mkt $"]: format(marketValue + changeValue),
         };
       });
     }
