@@ -45,10 +45,11 @@ function contentScript(mode) {
   }
 
   const stockTable = document.querySelector("#nimbus-app .table-container.cs-compact.headerWrap > table");
+  const heads = stockTable.querySelectorAll("thead > tr > th");
+  const stocks = stockTable.querySelectorAll("tbody > tr");
   if (mode <= 1) {
     const p = ["Pre", "Post"];
 
-    const heads = stockTable.querySelectorAll("thead > tr > th");
     let changePercentCol, marketValueCol;
     heads.forEach((head, i) => {
       if (head.innerText == p[mode] + "-Mkt Chg %") changePercentCol = i + 1;
@@ -59,7 +60,6 @@ function contentScript(mode) {
       return;
     }
 
-    const stocks = stockTable.querySelectorAll("tbody > tr");
     let portfolioSum, changeSum, changeTable;
     function scrapeTable() {
       portfolioSum = 0;
@@ -93,18 +93,25 @@ function contentScript(mode) {
     return [mode, p[mode], format(changeSum), sumPercent];
   }
   else if (mode == 2) {
-    const prices = stockTable.querySelectorAll(":not(.Fz\\(s\\))[data-field=regularMarketPrice][data-trend=none]");
-    const highs = stockTable.querySelectorAll("[aria-label='52-Wk High']");
-    const lows = stockTable.querySelectorAll("[aria-label='52-Wk Low']");
+    let marketValueCol, priceCol, highCol, lowCol;
+    heads.forEach((head, i) => {
+      if (head.innerText == "Market Value ($)") marketValueCol = i + 1;
+      else if (head.innerText == "Last Price") priceCol = i + 1;
+      else if (head.innerText == "52-Wk High") highCol = i + 1;
+      else if (head.innerText == "52-Wk Low") lowCol = i + 1;
+    });
+    if (!priceCol || !highCol || !lowCol) {
+      console.log('"52-Wk Low" or "52-Wk High" or "Last Price" columns not found.');
+      return;
+    }
 
     const rangeArray = [];
-    for (let i = 0; i < prices.length; ++i) {
-      const symbol = prices[i].dataset.symbol;
-      const stock = stockTable.querySelector(`.Fz\\(s\\)[data-field=regularMarketPrice][data-trend=none][data-symbol="${symbol}"]`);
-      const marketValue = Number(stock?.getAttribute("value"));
-      const price = Number(prices[i].getAttribute("value"));
-      const high = Number(highs[i].innerText.replace(/,/g, ""));
-      const low = Number(lows[i].innerText.replace(/,/g, ""));
+    stocks.forEach((stock, i) => {
+      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent;
+      const marketValue = marketValueCol ? Number(stock.querySelector(`td:nth-child(${marketValueCol}) > span`).textContent.replace(/,/g, "")) : 0;
+      const price = Number(stock.querySelector(`td:nth-child(${priceCol}) > span`).textContent.replace(/,/g, ""));
+      const high = Number(stock.querySelector(`td:nth-child(${highCol})`).textContent.replace(/,/g, ""));
+      const low = Number(stock.querySelector(`td:nth-child(${lowCol})`).textContent.replace(/,/g, ""));
 
       rangeArray.push({
         index: i,
@@ -112,9 +119,9 @@ function contentScript(mode) {
         percentage: (price - low) / (high - low),
         marketValue: marketValue,
       });
-    }
+    });
 
-    const reorder = document.querySelector("[data-test=save-order-btn]");
+    const reorder = document.querySelector("#nimbus-app .table-toolbar > div > button");
     if (reorder) {
       function sortTable(i) {
         let min = i;
@@ -123,7 +130,7 @@ function contentScript(mode) {
         }
 
         if (min > i) {
-          const rows = stockTable.querySelector("tbody").querySelectorAll("tr");
+          const rows = stockTable.querySelectorAll("tbody > tr");
           rows[min].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
           rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: (i - min) * 32 }));
           rows[min].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
