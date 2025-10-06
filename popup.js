@@ -66,10 +66,10 @@ function contentScript(mode) {
       changeSum = 0;
       changeTable = {};
       stocks.forEach((stock) => {
-        const marketValue = Number(stock.querySelector(`td:nth-child(${marketValueCol}) > span`).textContent.replace(/,/g, ""));
+        const marketValue = Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, ""));
         portfolioSum += marketValue;
 
-        const changePercent = Number(stock.querySelector(`td:nth-child(${changePercentCol}) > span`)?.textContent.replace(/%/g, ""));
+        const changePercent = Number(stock.querySelector(`td:nth-child(${changePercentCol})`)?.textContent.replace(/%/g, ""));
         const changeValue = changePercent ? marketValue * changePercent / 100 : 0;
         changeSum += changeValue;
 
@@ -107,15 +107,14 @@ function contentScript(mode) {
 
     const rangeArray = [];
     stocks.forEach((stock, i) => {
-      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent;
-      const marketValue = marketValueCol ? Number(stock.querySelector(`td:nth-child(${marketValueCol}) > span`).textContent.replace(/,/g, "")) : 0;
-      const price = Number(stock.querySelector(`td:nth-child(${priceCol}) > span`).textContent.replace(/,/g, ""));
+      const marketValue = marketValueCol ? Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, "")) : 0;
+      const price = Number(stock.querySelector(`td:nth-child(${priceCol})`).textContent.replace(/,/g, ""));
       const high = Number(stock.querySelector(`td:nth-child(${highCol})`).textContent.replace(/,/g, ""));
       const low = Number(stock.querySelector(`td:nth-child(${lowCol})`).textContent.replace(/,/g, ""));
 
       rangeArray.push({
         index: i,
-        symbol: symbol,
+        symbol: stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent,
         percentage: (price - low) / (high - low),
         marketValue: marketValue,
       });
