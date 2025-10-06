@@ -4,6 +4,7 @@
 pre_button.onclick = () => shuFinanceTools(0);
 post_button.onclick = () => shuFinanceTools(1);
 range_button.onclick = () => shuFinanceTools(2);
+target_button.onclick = () => shuFinanceTools(3);
 
 function shuFinanceTools(mode) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {
@@ -32,6 +33,13 @@ function shuFinanceTools(mode) {
               }
             });
             if (!changes) stock_table.innerHTML = "No changes";
+          }
+          else if (res.result[0] == 3) {
+            stock_table.innerHTML = "";
+            res.result[1].sort((a, b) => a.target - b.target);
+            res.result[1].forEach((stock) => {
+              stock_table.innerHTML += `<tr><td>${stock.symbol}</td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+            });
           }
         }
       });
@@ -155,5 +163,40 @@ function contentScript(mode) {
     }
     console.table(rangeTable);
     return [mode, rangeArray];
+  }
+  else if (mode == 3) {
+    let marketValueCol, targetCol, priceCol;
+    heads.forEach((head, i) => {
+      if (head.innerText == "Market Value ($)") marketValueCol = i + 1;
+      else if (head.innerText == "1yr Target Est") targetCol = i + 1;
+      else if (head.innerText == "Last Price") priceCol = i + 1;
+    });
+    if (!targetCol || !priceCol) {
+      console.log('"1yr Target Est" or "Last Price" columns not found.');
+      return;
+    }
+
+    const targetArray = [];
+    stocks.forEach((stock, i) => {
+      const marketValue = marketValueCol ? Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, "")) : 0;
+      const target = Number(stock.querySelector(`td:nth-child(${targetCol})`).textContent.replace(/,/g, ""));
+      const price = Number(stock.querySelector(`td:nth-child(${priceCol})`).textContent.replace(/,/g, ""));
+
+      targetArray.push({
+        symbol: stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent,
+        target: format((target - price) / price * 100),
+        marketValue: format(marketValue),
+      });
+    });
+
+    const targetTable = {};
+    for (let i = 0; i < targetArray.length; ++i) {
+      targetTable[targetArray[i].symbol] = {
+        "1yr Target Est %": targetArray[i].target,
+        "Market Value": targetArray[i].marketValue,
+      };
+    }
+    console.table(targetTable);
+    return [mode, targetArray];
   }
 }
