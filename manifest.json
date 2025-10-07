@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Shu's Finance Tools",
-  "description": "Extra utilities for your Yahoo Finance portfolios.",
+  "description": "Extra utilities for Yahoo Finance portfolios.",
   "version": "1.0",
   "action": {
     "default_title": "Shu's Finance Tools",

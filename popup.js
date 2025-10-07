@@ -28,7 +28,7 @@ function shuFinanceTools(mode) {
             res.result[1].forEach((stock) => {
               if (stock.change) {
                 if (!changes) stock_table.innerHTML = "";
-                stock_table.innerHTML += `<tr><td>${stock.symbol}</td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
                 ++changes;
               }
             });
@@ -38,7 +38,7 @@ function shuFinanceTools(mode) {
             stock_table.innerHTML = "";
             res.result[1].sort((a, b) => a.target - b.target);
             res.result[1].forEach((stock) => {
-              stock_table.innerHTML += `<tr><td>${stock.symbol}</td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+              stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
             });
           }
         }

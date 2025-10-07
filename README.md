@@ -1,5 +1,5 @@
 # Shu's Finance Tools
-Chrome extension that adds extra utilities for your Yahoo Finance portfolios.  
+Chrome extension that adds extra utilities for Yahoo Finance portfolios.  
 This extension only works on Yahoo Finance portfolio pages.
 
 ### After-Hours Portfolio Tracker
@@ -10,6 +10,10 @@ This extension only works on Yahoo Finance portfolio pages.
 - A [custom portfolio view](https://help.yahoo.com/kb/set-custom-views-portfolios-sln5231.html) with **52-Wk Low**, **52-Wk High**, and **Last Price** columns required.
 - In your portfolio page, click on Reorder. Then click the button in the extension popup to sort your portfolio.  
   Don't forget to Save!
+
+### 1yr Target Estimate Sorter
+- A [custom portfolio view](https://help.yahoo.com/kb/set-custom-views-portfolios-sln5231.html) with **1yr Target Est** and **Last Price** columns required.
+- Lists stocks sorted by 1yr upside estimate percentage.
 
 ## Installation
 - Download the source into a folder.
