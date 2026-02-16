@@ -14,35 +14,35 @@ function shuFinanceTools(mode) {
         func: contentScript,
         args: [mode],
       })
-      .then(([res]) => {
-        if (res.result) {
-          if (res.result[0] <= 1) {
-            pre_post.innerHTML = res.result[1];
-            change_sum.innerHTML = "$" + res.result[2];
-            chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
-            chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
+        .then(([res]) => {
+          if (res.result) {
+            if (res.result[0] <= 1) {
+              pre_post.innerHTML = res.result[1];
+              change_sum.innerHTML = "$" + res.result[2];
+              chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
+              chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
+            }
+            else if (res.result[0] == 2) {
+              res.result[1].sort((a, b) => a.change - b.change);
+              let changes = 0;
+              res.result[1].forEach((stock) => {
+                if (stock.change) {
+                  if (!changes) stock_table.innerHTML = "";
+                  stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+                  ++changes;
+                }
+              });
+              if (!changes) stock_table.innerHTML = "No changes";
+            }
+            else if (res.result[0] == 3) {
+              stock_table.innerHTML = "";
+              res.result[1].sort((a, b) => a.target - b.target);
+              res.result[1].forEach((stock) => {
+                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+              });
+            }
           }
-          else if (res.result[0] == 2) {
-            res.result[1].sort((a, b) => a.change - b.change);
-            let changes = 0;
-            res.result[1].forEach((stock) => {
-              if (stock.change) {
-                if (!changes) stock_table.innerHTML = "";
-                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
-                ++changes;
-              }
-            });
-            if (!changes) stock_table.innerHTML = "No changes";
-          }
-          else if (res.result[0] == 3) {
-            stock_table.innerHTML = "";
-            res.result[1].sort((a, b) => a.target - b.target);
-            res.result[1].forEach((stock) => {
-              stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
-            });
-          }
-        }
-      });
+        });
     }
   });
 }

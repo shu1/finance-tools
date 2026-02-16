@@ -7,5 +7,8 @@
     "default_title": "Shu's Finance Tools",
     "default_popup": "popup.html"
   },
-  "permissions": ["activeTab", "scripting"]
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ]
 }
