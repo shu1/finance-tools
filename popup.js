@@ -122,34 +122,26 @@ function contentScript(mode) {
 
       rangeArray.push({
         index: i,
+        pos: stock.dataset.testidRow,
         symbol: stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent,
         percentage: (price - low) / (high - low),
         marketValue: marketValue,
       });
     });
+    rangeArray.sort((a, b) => a.percentage - b.percentage);
 
-    const reorder = document.querySelector("#nimbus-app .table-toolbar > div > button");
-    if (reorder) {
-      function sortTable(i) {
-        let min = i;
-        for (let j = i + 1; j < rangeArray.length; ++j) {
-          if (rangeArray[j].percentage < rangeArray[min].percentage) min = j;
-        }
-
-        if (min > i) {
-          const rows = stockTable.querySelectorAll("tbody > tr");
-          rows[min].dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-          rows[min].dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientY: (i - min) * 32 }));
-          rows[min].dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
-
-          rangeArray.splice(i, 0, rangeArray.splice(min, 1)[0]);
-        }
-
-        if (i + 2 < rangeArray.length) sortTable(i + 1);
-      }
-      sortTable(0);
+    if (document.querySelector("button.quaternary-blue-btn.fin-size-small.rounded")) {
+      const pfId = location.pathname.match(/\/portfolio\/([^/]+)(\/view)?/)[1];
+      const crumb = JSON.parse(document.getElementById("nimbus-benji-config").textContent)?.i13n?.user?.crumb;
+      fetch(`https://query1.finance.yahoo.com/v6/finance/portfolio/update?pfId=${pfId}&crumb=${crumb}`, {
+        method: "put",
+        credentials: "include",
+        body: JSON.stringify({
+          "parameters": { "pfId": pfId },
+          "operations": rangeArray.map((e, i) => ({ "operation": "position_update", "posId": e.pos, "sortOrder": i }))
+        })
+      });
     }
-    else rangeArray.sort((a, b) => a.percentage - b.percentage);
 
     const rangeTable = {};
     for (let i = 0; i < rangeArray.length; ++i) {
