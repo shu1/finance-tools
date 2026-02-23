@@ -1,10 +1,10 @@
 // Shuichi Aizawa 2024
 "use strict";
 
-pre_button.onclick = () => shuFinanceTools(0);
-post_button.onclick = () => shuFinanceTools(1);
-range_button.onclick = () => shuFinanceTools(2);
-target_button.onclick = () => shuFinanceTools(3);
+pre_btn.onclick = () => shuFinanceTools(0);
+post_btn.onclick = () => shuFinanceTools(1);
+range_btn.onclick = () => shuFinanceTools(2);
+target_btn.onclick = () => shuFinanceTools(3);
 
 function shuFinanceTools(mode) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, ([tab]) => {

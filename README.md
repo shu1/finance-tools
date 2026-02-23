@@ -8,11 +8,11 @@ This extension only works on Yahoo Finance portfolio pages.
 
 ### 52-Week Range Sorter
 - A custom portfolio view with **52-Wk Low**, **52-Wk High**, and **Last Price** columns required.
-- In your portfolio page, click the Custom Order button. Then in the extension popup, click the 52-Wk Range button.
+- In your portfolio page, click the Custom Order button. Then in the extension popup, click the 52-Wk Range button. Refresh page to see sorted order.
 
-### 1yr Target Estimate Sorter
+### 1-Year Target Estimate Sorter
 - A custom portfolio view with **1yr Target Est** and **Last Price** columns required.
-- Lists stocks sorted by 1yr upside estimate percentage.
+- Lists stocks sorted by 1-year upside estimate percentage.
 
 ## Installation
 - Download the source into a folder.
