@@ -28,7 +28,7 @@ function shuFinanceTools(mode) {
               res.result[1].forEach((stock) => {
                 if (stock.change) {
                   if (!changes) stock_table.innerHTML = "";
-                  stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+                  stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}" title="${stock.title}">${stock.symbol}</a></td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
                   ++changes;
                 }
               });
@@ -38,7 +38,7 @@ function shuFinanceTools(mode) {
               stock_table.innerHTML = "";
               res.result[1].sort((a, b) => a.target - b.target);
               res.result[1].forEach((stock) => {
-                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}" title="${stock.title}">${stock.symbol}</a></td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
               });
             }
           }
@@ -119,11 +119,13 @@ function contentScript(mode) {
       const price = Number(stock.querySelector(`td:nth-child(${priceCol})`).textContent.replace(/,/g, ""));
       const high = Number(stock.querySelector(`td:nth-child(${highCol})`).textContent.replace(/,/g, ""));
       const low = Number(stock.querySelector(`td:nth-child(${lowCol})`).textContent.replace(/,/g, ""));
+      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a");
 
       rangeArray.push({
         index: i,
         pos: stock.dataset.testidRow,
-        symbol: stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent,
+        symbol: symbol.textContent,
+        title: symbol.title,
         percentage: (price - low) / (high - low),
         marketValue: marketValue,
       });
@@ -173,9 +175,11 @@ function contentScript(mode) {
       const marketValue = marketValueCol ? Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, "")) : 0;
       const target = Number(stock.querySelector(`td:nth-child(${targetCol})`).textContent.replace(/,/g, ""));
       const price = Number(stock.querySelector(`td:nth-child(${priceCol})`).textContent.replace(/,/g, ""));
+      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a")
 
       targetArray.push({
-        symbol: stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent,
+        symbol: symbol.textContent,
+        title: symbol.title,
         target: format((target - price) / price * 100),
         marketValue: format(marketValue),
       });
