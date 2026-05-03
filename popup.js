@@ -38,7 +38,7 @@ function shuFinanceTools(mode) {
               stock_table.innerHTML = "";
               res.result[1].sort((a, b) => a.target - b.target);
               res.result[1].forEach((stock) => {
-                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}" title="${stock.title}">${stock.symbol}</a></td><td>${stock.target}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
+                stock_table.innerHTML += `<tr><td><a href="https://finance.yahoo.com/quote/${stock.symbol}" title="${stock.title}">${stock.symbol}</a></td><td>${Math.round(stock.target)}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td></tr>`;
               });
             }
           }
