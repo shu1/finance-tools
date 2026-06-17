@@ -20,6 +20,11 @@ function shuFinanceTools(mode) {
             change_sum.innerHTML = "$" + res.result[2];
             chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
             chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
+
+            stock_table.innerHTML = "";
+            res.result[4].forEach((stock) => {
+              stock_table.innerHTML += `<tr><td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.changePercent}%</td><td>$${Math.round(stock.changeValue)}</td><td>$${Math.round(stock.marketValue)}</td><td class=name>${stock.name}</td></tr>`;
+            });
           }
           else if (res.result[0] == 2) {
             res.result[1].sort((a, b) => a.change - b.change);
@@ -67,11 +72,11 @@ function contentScript(mode) {
       return;
     }
 
-    let portfolioSum, changeSum, changeTable;
+    let portfolioSum, changeSum, changeArray;
     function scrapeTable() {
       portfolioSum = 0;
       changeSum = 0;
-      changeTable = {};
+      changeArray = [];
       stocks.forEach((stock) => {
         const marketValue = Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, ""));
         portfolioSum += marketValue;
@@ -80,12 +85,16 @@ function contentScript(mode) {
         const changeValue = changePercent ? marketValue * changePercent / 100 : 0;
         changeSum += changeValue;
 
-        changeTable[stock.querySelector("td.inlineBlock.lpin > div > div > a").textContent] = {
-          [p[mode] + "-Mkt Chg %"]: format(changePercent),
-          [p[mode] + "-Mkt Chg $"]: format(changeValue),
-          [p[mode] + "-Mkt $"]: format(marketValue + changeValue),
-        };
+        const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a");
+        changeArray.push({
+          symbol: symbol.textContent,
+          name: symbol.title,
+          changePercent: format(changePercent),
+          changeValue: format(changeValue),
+          marketValue: format(marketValue + changeValue),
+        });
       });
+      changeArray.sort((a, b) => a.changeValue - b.changeValue);
     }
     scrapeTable();
     if (!changeSum) {
@@ -94,10 +103,18 @@ function contentScript(mode) {
     }
     if (!changeSum) return;
 
+    const changeTable = {};
+    for (let i = 0; i < changeArray.length; ++i) {
+      changeTable[changeArray[i].symbol] = {
+        [p[mode] + "-Mkt Chg %"]: changeArray[i].changePercent,
+        [p[mode] + "-Mkt Chg $"]: changeArray[i].changeValue,
+        [p[mode] + "-Mkt $"]: changeArray[i].marketValue,
+      };
+    }
     console.table(changeTable);
     const sumPercent = format(changeSum / portfolioSum * 100);
     console.log(`${p[mode]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
-    return [mode, p[mode], format(changeSum), sumPercent];
+    return [mode, p[mode], format(changeSum), sumPercent, changeArray];
   }
   else if (mode == 2) {
     let marketValueCol, priceCol, highCol, lowCol;
