@@ -23,16 +23,27 @@ function shuFinanceTools(mode) {
 
             stock_table.innerHTML = "";
             res.result[4].forEach((stock) => {
-              stock_table.innerHTML += `<tr><td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.changePercent}%</td><td>$${Math.round(stock.changeValue)}</td><td>$${Math.round(stock.marketValue)}</td><td class=name>${stock.name}</td></tr>`;
+              stock_table.innerHTML += `<tr>
+<td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td>
+<td>${stock.changePercent}%</td>
+<td>$${Math.round(stock.changeValue)}</td>
+<td>$${Math.round(stock.marketValue)}</td>
+<td class=name>${stock.name}</td>
+</tr>`;
             });
           }
           else if (res.result[0] == 2) {
-            res.result[1].sort((a, b) => a.change - b.change);
             let changes = 0;
+            res.result[1].sort((a, b) => a.change - b.change);
             res.result[1].forEach((stock) => {
               if (stock.change) {
                 if (!changes) stock_table.innerHTML = "";
-                stock_table.innerHTML += `<tr><td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${stock.change}</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td><td class=name>${stock.name}</td></tr>`;
+                stock_table.innerHTML += `<tr>
+<td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td>
+<td>${stock.change}</td>
+<td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td>
+<td class=name>${stock.name}</td>
+</tr>`;
                 ++changes;
               }
             });
@@ -40,9 +51,13 @@ function shuFinanceTools(mode) {
           }
           else if (res.result[0] == 3) {
             stock_table.innerHTML = "";
-            res.result[1].sort((a, b) => a.target - b.target);
             res.result[1].forEach((stock) => {
-              stock_table.innerHTML += `<tr><td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td><td>${Math.round(stock.target)}%</td><td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td><td class=name>${stock.name}</td></tr>`;
+              stock_table.innerHTML += `<tr>
+<td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td>
+<td>${Math.round(stock.target)}%</td>
+<td>$${stock.marketValue ? Math.round(stock.marketValue) : 0}</td>
+<td class=name>${stock.name}</td>
+</tr>`;
             });
           }
         }
@@ -191,7 +206,7 @@ function contentScript(mode) {
       const marketValue = marketValueCol ? Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, "")) : 0;
       const target = Number(stock.querySelector(`td:nth-child(${targetCol})`).textContent.replace(/,/g, ""));
       const price = Number(stock.querySelector(`td:nth-child(${priceCol})`).textContent.replace(/,/g, ""));
-      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a")
+      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a");
 
       targetArray.push({
         symbol: symbol.textContent,
@@ -200,6 +215,7 @@ function contentScript(mode) {
         marketValue: format(marketValue),
       });
     });
+    targetArray.sort((a, b) => a.target - b.target);
 
     const targetTable = {};
     for (let i = 0; i < targetArray.length; ++i) {
