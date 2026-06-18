@@ -17,7 +17,7 @@ function shuFinanceTools(mode) {
         if (res.result) {
           if (res.result[0] <= 1) {
             pre_post.innerHTML = res.result[1];
-            change_sum.innerHTML = "$" + res.result[2];
+            change_sum.innerHTML = `$${res.result[2]}, ${res.result[3]}%`;
             chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
             chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
 
@@ -128,8 +128,9 @@ function contentScript(mode) {
     }
     console.table(changeTable);
     const sumPercent = format(changeSum / portfolioSum * 100);
-    console.log(`${p[mode]}-Mkt Chg Sum: $${format(changeSum)}, ${sumPercent}%`);
-    return [mode, p[mode], format(changeSum), sumPercent, changeArray];
+    changeSum = Math.round(changeSum);
+    console.log(`${p[mode]}-Mkt Chg Sum: $${changeSum}, ${sumPercent}%`);
+    return [mode, p[mode], changeSum, sumPercent, changeArray];
   }
   else if (mode == 2) {
     let marketValueCol, priceCol, highCol, lowCol;
