@@ -25,7 +25,7 @@ function shuFinanceTools(mode) {
             res.result[4].forEach((stock) => {
               stock_table.innerHTML += `<tr>
 <td><a title="${stock.name}" href="https://finance.yahoo.com/quote/${stock.symbol}">${stock.symbol}</a></td>
-<td>${stock.changePercent}%</td>
+<td>${stock.changePercent.toFixed(1)}%</td>
 <td>$${Math.round(stock.changeValue)}</td>
 <td>$${Math.round(stock.marketValue)}</td>
 <td class=name>${stock.name}</td>
