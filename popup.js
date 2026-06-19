@@ -88,35 +88,25 @@ function contentScript(mode) {
       return msg;
     }
 
-    let portfolioSum, changeSum, changeArray;
-    function scrapeTable() {
-      portfolioSum = 0;
-      changeSum = 0;
-      changeArray = [];
-      stocks.forEach((stock) => {
-        const marketValue = Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, ""));
-        portfolioSum += marketValue;
+    let portfolioSum = 0, changeSum = 0, changeArray = [];
+    stocks.forEach((stock) => {
+      const marketValue = Number(stock.querySelector(`td:nth-child(${marketValueCol})`).textContent.replace(/,/g, ""));
+      portfolioSum += marketValue;
 
-        const changePercent = Number(stock.querySelector(`td:nth-child(${changePercentCol})`)?.textContent.replace(/%/g, ""));
-        const changeValue = changePercent ? marketValue * changePercent / 100 : 0;
-        changeSum += changeValue;
+      const changePercent = Number(stock.querySelector(`td:nth-child(${changePercentCol})`)?.textContent.replace(/%/g, ""));
+      const changeValue = changePercent ? marketValue * changePercent / 100 : 0;
+      changeSum += changeValue;
 
-        const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a");
-        changeArray.push({
-          symbol: symbol.textContent,
-          name: symbol.title,
-          changePercent: format(changePercent),
-          changeValue: format(changeValue),
-          marketValue: format(marketValue + changeValue),
-        });
+      const symbol = stock.querySelector("td.inlineBlock.lpin > div > div > a");
+      changeArray.push({
+        symbol: symbol.textContent,
+        name: symbol.title,
+        changePercent: format(changePercent),
+        changeValue: format(changeValue),
+        marketValue: format(marketValue + changeValue),
       });
-      changeArray.sort((a, b) => a.changeValue - b.changeValue);
-    }
-    scrapeTable();
-    if (!changeSum) {
-      mode = 1 - mode;
-      scrapeTable();
-    }
+    });
+    changeArray.sort((a, b) => a.changeValue - b.changeValue);
     if (!changeSum) return p[mode] + "-Mkt Chg Sum: None";
 
     const changeTable = {};
