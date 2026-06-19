@@ -16,10 +16,9 @@ function shuFinanceTools(mode) {
       }).then(([res]) => {
         if (res.result) {
           if (res.result[0] <= 1) {
-            pre_post.innerHTML = res.result[1];
-            change_sum.innerHTML = `$${res.result[2]}, ${res.result[3]}%`;
             chrome.action.setBadgeText({ text: res.result[3].toFixed(1) + "%" });
             chrome.action.setTitle({ title: res.result[1] + "-Mkt Chg Sum: $" + res.result[2] });
+            msg_div.textContent = `${res.result[1]}-Mkt Chg Sum: $${res.result[2]}, ${res.result[3]}%`;
 
             stock_table.innerHTML = "";
             res.result[4].forEach((stock) => {
@@ -60,6 +59,7 @@ function shuFinanceTools(mode) {
 </tr>`;
             });
           }
+          else msg_div.textContent = res.result;
         }
       });
     }
@@ -83,8 +83,9 @@ function contentScript(mode) {
       else if (head.innerText == "Market Value ($)") marketValueCol = i + 1;
     });
     if (!changePercentCol || !marketValueCol) {
-      console.log(`"${p[mode]}-Mkt Chg %" or "Market Value ($)" columns not found.`);
-      return;
+      const msg = `"${p[mode]}-Mkt Chg %" or "Market Value ($)" columns not found.`;
+      console.log(msg);
+      return msg;
     }
 
     let portfolioSum, changeSum, changeArray;
@@ -116,7 +117,7 @@ function contentScript(mode) {
       mode = 1 - mode;
       scrapeTable();
     }
-    if (!changeSum) return;
+    if (!changeSum) return p[mode] + "-Mkt Chg Sum: None";
 
     const changeTable = {};
     for (let i = 0; i < changeArray.length; ++i) {
@@ -141,8 +142,9 @@ function contentScript(mode) {
       else if (head.innerText == "52-Wk Low") lowCol = i + 1;
     });
     if (!priceCol || !highCol || !lowCol) {
-      console.log('"52-Wk Low" or "52-Wk High" or "Last Price" columns not found.');
-      return;
+      const msg = '"52-Wk Low" or "52-Wk High" or "Last Price" columns not found.';
+      console.log(msg);
+      return msg;
     }
 
     const rangeArray = [];
@@ -198,8 +200,9 @@ function contentScript(mode) {
       else if (head.innerText == "Last Price") priceCol = i + 1;
     });
     if (!targetCol || !priceCol) {
-      console.log('"1yr Target Est" or "Last Price" columns not found.');
-      return;
+      const msg = '"1yr Target Est" or "Last Price" columns not found.';
+      console.log(msg);
+      return msg;
     }
 
     const targetArray = [];
